@@ -1,0 +1,77 @@
+BasicInfo:
+  Title                   : mcu
+  CompanyCode             : "00"
+  ProductCode             : CTR-X-MCU
+  ContentType             : Application
+  Logo                    : None
+
+TitleInfo:
+  UniqueId                : 0x1F
+  Category                : Base
+  Version                 : 2
+
+Option:
+  UseOnSD                 : false
+  FreeProductCode         : true # Removes limitations on ProductCode
+  MediaFootPadding        : false # If true CCI files are created with padding
+  EnableCrypt             : true # Enables encryption for NCCH and CIA
+  EnableCompress          : true # Compresses exefs code
+  UseKtrProgramId         : true
+
+AccessControlInfo:
+  IdealProcessor                : 1
+  AffinityMask                  : 2
+
+  Priority                      : -12
+
+  DisableDebug                  : true
+  EnableForceDebug              : false
+  CanWriteSharedPage            : false
+  CanUsePrivilegedPriority      : false
+  CanUseNonAlphabetAndNumber    : false
+  PermitMainFunctionArgument    : false
+  CanShareDeviceMemory          : false
+  RunnableOnSleep               : true
+  SpecialMemoryArrange          : false
+  ResourceLimitCategory         : Other
+
+  CoreVersion                   : 2
+  DescVersion                   : 2
+
+  MemoryType                    : Base      # Application / System / Base
+  HandleTableSize: 0x200
+
+  SystemSaveDataId1: 0
+
+  SystemCallAccess:
+    ExitProcess: 0x03
+    CreateThread: 0x08
+    ExitThread: 0x09
+    SleepThread: 0x0A
+    CreateEvent: 0x17
+    SignalEvent: 0x18
+    CreateAddressArbiter: 0x21
+    ArbitrateAddress: 0x22
+    CloseHandle: 0x23
+    WaitSynchronization: 0x24
+    WaitSynchronizationN: 0x25
+    GetSystemTick: 0x28
+    ConnectToPort: 0x2D
+    SendSyncRequest: 0x32
+    GetProcessId: 0x35
+    Break: 0x3C
+    AcceptSession: 0x4A
+    ReplyAndReceive: 0x4F
+    OutputDebugString: 0x3D
+
+  InterruptNumbers:
+  ServiceAccessControl:
+    - gpio:MCU
+    - i2c::MCU
+
+SystemControlInfo:
+  RemasterVersion: 0
+  StackSize: 0x1000
+  Dependency:
+    gpio: 0x0004013000001B02
+    i2c: 0x0004013000001E02
