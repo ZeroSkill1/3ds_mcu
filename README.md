@@ -8,7 +8,7 @@ In the future, I may try to reimplement the firmware. Until then, this sysmodule
 
 **IF YOU USE THE FIRMWARE UPGRADE FEATURE, YOU USE IT AT YOUR OWN RISK. UPLOADING INVALID FIRMWARE TO THE MCU CAN CAUSE A BRICK THAT CANNOT BE RECOVERED FROM BY SIMPLE MEANS (INCLUDING NTRBOOT). UNLESS YOU ARE PREPARED TO SOLDER WIRES TO YOUR CONSOLE'S MOTHERBOARD TO FLASH THE MCU FIRMWARE USING EXTERNAL HARDWARE IN THE EVENT OF A BRICK, DO NOT USE THE FIRMWARE UPLOAD FEATURE.**
 
-With all of that out of thew way, it is possible to enable firmware uploads by configuring using the environment variables listed below. Place your MCU firmware in the same directory as the Makefile and name it `mcu_firm.bin`. **This firmware blob must be exactly 0x4000 bytes in size.**
+With all of that out of the way, it is possible to enable firmware uploads by configuring using the environment variables listed below. Place your MCU firmware in the same directory as the Makefile and name it `mcu_firm.bin`. **This firmware blob must be exactly 0x4000 bytes in size.**
 
 # Compiling
 
