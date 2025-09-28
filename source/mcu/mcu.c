@@ -415,7 +415,7 @@ inline Result mcuGetInterruptMask(u32 *out_enabled_interrupts, bool lock)
 {
 	Result res = L(mcuReadRegisterBuffer8, MCUREG_IRQ_MASK, out_enabled_interrupts, sizeof(u32));
 	if (R_FAILED(res)) return res;
-	*out_enabled_interrupts = ~(*out_enabled_interrupts & ~(MCUINT_MCU_SYSMODULE_0 | MCUINT_MCU_SYSMODULE_1));
+	*out_enabled_interrupts = ~(*out_enabled_interrupts) & ~(MCUINT_MCU_SYSMODULE_0 | MCUINT_MCU_SYSMODULE_1);
 	return res;
 }
 
