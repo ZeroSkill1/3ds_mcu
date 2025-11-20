@@ -4,46 +4,12 @@
 
 
 #include <mcu/globals.h>
-#include <mcu/util.h>
 #include <mcu/mcu.h>
 #include <mcu/ipc.h>
+#include <util.h>
 
 #define CMD_ID_RANGE(id, lower, upper) \
 	(id >= lower && id <= upper)
-
-// 0x1-0x2D: net, sys, u
-// 0x401-0x419: net, u
-// 0x801-0x829: net
-// 0x1001-0x100D: net, sys, u, app
-
-// net: 0x1-0x2D, 0x410-0x419, 0x801-0x829, 0x1001-0x100D
-// u  : 0x1-0x2D, 0x401-0x419, 0x1001-0x100D
-// sys: 0x1-0x2D, 0x1001-0x100D
-// app: 0x1001-0x100D
-
-#ifdef DEBUG_PRINTS
-	#define PRINT_RET(name) \
-		u32 header_ret = cmdbuf[0]; \
-		Result res = cmdbuf[1]; \
-		DEBUG_PRINTF3("[mcu::" name "] src (", cmd_header, ") -> (", header_ret, ") replying with result ", res);
-#else
-	#define PRINT_RET(name)
-#endif
-
-//void AMNET_HandleIPC(AM_SessionData *session)
-//{
-//	u32 *cmdbuf  = getThreadCommandBuffer();
-//	GET_OGHDR
-//	u16 cmd_id = (u16)(cmdbuf[0] >> 16);
-//
-//	if      (CMD_ID_RANGE(cmd_id, 0x1   , 0x2D  )) AM_HandleIPC_Range0x1_0x2D();
-//	else if (CMD_ID_RANGE(cmd_id, 0x401 , 0x419 )) AM_HandleIPC_Range0x401_0x419(session);
-//	else if (CMD_ID_RANGE(cmd_id, 0x801 , 0x829 )) AM_HandleIPC_Range0x801_0x829(session);
-//	else if (CMD_ID_RANGE(cmd_id, 0x1001, 0x100D)) AM_HandleIPC_Range0x1001_0x100D();
-//	else RET_OS_INVALID_IPCARG
-//
-//	PRINT_RET("net")
-//}
 
 #define MCUGPU_ENABLED_IRQS MCUINT_VIDEO_LCD_PUSH_POWER_OFF | MCUINT_VIDEO_LCD_PUSH_POWER_ON | \
                             MCUINT_VIDEO_BOT_BACKLIGHT_OFF | MCUINT_VIDEO_BOT_BACKLIGHT_ON | \
@@ -135,8 +101,6 @@ void MCUCAM_HandleIPC()
 		}
 		break;
 	}
-	
-	PRINT_RET("CAM")
 }
 
 void MCUGPU_HandleIPC()
@@ -322,8 +286,6 @@ void MCUGPU_HandleIPC()
 		}
 		break;
 	}
-	
-	PRINT_RET("GPU");
 }
 
 void MCUHID_HandleIPC()
@@ -1533,21 +1495,21 @@ void MCURTC_HandleIPC()
 			cmdbuf[2] = enabled_irqs;
 		}
 		break;
-	case 0x004B: // enter exclusive interrupt mode
+	case 0x004B: // leave exclusive interrupt mode
 		{
 			CHECK_HEADER(0x004B, 0, 0)
 			
-			RecursiveLock_Lock(&g_ExclusiveIRQLock);
+			RecursiveLock_Unlock(&g_ExclusiveIRQLock);
 			
 			cmdbuf[0] = IPC_MakeHeader(0x004B, 1, 0);
 			cmdbuf[1] = 0;
 		}
 		break;
-	case 0x004C: // leave exclusive interrupt mode
+	case 0x004C: // enter exclusive interrupt mode
 		{
 			CHECK_HEADER(0x004C, 0, 0)
 			
-			RecursiveLock_Unlock(&g_ExclusiveIRQLock);
+			RecursiveLock_Lock(&g_ExclusiveIRQLock);
 			
 			cmdbuf[0] = IPC_MakeHeader(0x004C, 1, 0);
 			cmdbuf[1] = 0;
@@ -1560,7 +1522,7 @@ void MCURTC_HandleIPC()
 			u32 received_irqs = 0;
 			
 			Result res = mcuGetReceivedIrqs(&received_irqs, LOCK);
-			
+
 			cmdbuf[0] = IPC_MakeHeader(0x004D, 2, 0);
 			cmdbuf[1] = res;
 			cmdbuf[2] = received_irqs;
@@ -1750,8 +1712,6 @@ void MCURTC_HandleIPC()
 		}
 		break;
 	}
-	
-	PRINT_RET("RTC");
 }
 
 void MCUSND_HandleIPC()
@@ -1801,8 +1761,6 @@ void MCUSND_HandleIPC()
 		}
 		break;
 	}
-	
-	PRINT_RET("SND");
 }
 
 void MCUNWM_HandleIPC()
@@ -1928,8 +1886,6 @@ void MCUNWM_HandleIPC()
 		}
 		break;
 	}
-	
-	PRINT_RET("NWM");
 }
 
 void MCUHWC_HandleIPC()
@@ -2180,8 +2136,6 @@ void MCUHWC_HandleIPC()
 		}
 		break;
 	}
-	
-	PRINT_RET("HWC");
 }
 
 void MCUPLS_HandleIPC()
@@ -2310,8 +2264,6 @@ void MCUPLS_HandleIPC()
 		}
 		break;
 	}
-	
-	PRINT_RET("PLS");
 }
 
 void MCUCDC_HandleIPC()
@@ -2333,8 +2285,6 @@ void MCUCDC_HandleIPC()
 		}
 		break;
 	}
-	
-	PRINT_RET("CDC");
 }
 
 void (* MCU_IPCHandlers[9])() =

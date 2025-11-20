@@ -1,11 +1,11 @@
 #include <mcu/globals.h>
 #include <mcu/mcu.h>
-#include <mcu/util.h>
 #include <mcu/acc.h>
 #include <3ds/srv.h>
 #include <3ds/i2c.h>
 #include <3ds/err.h>
 #include <3ds/gpio.h>
+#include <util.h>
 
 RecursiveLock g_I2CLock;
 RecursiveLock g_GPIOLock;
@@ -193,17 +193,17 @@ void mcuHandleInterruptEvents(u32 received_irqs)
 		T(mcuGetReceivedIrqs(&received_irqs, LOCK));
 	
 	for (int i = 0; i < 3; i++) {
+		if (received_irqs & filtered_events[i]) {
+			g_ReceivedIRQs[i] |= (received_irqs & filtered_events[i]);
+			T(svcSignalEvent(g_IRQEvents[i]));
+		}
+		
 		/* special handling for HID, as that's signaled through the LightEvent later */
 		if (i == EVENT_HID) {
 			if (received_irqs & MCUINT_ACCELEROMETER_NEW_SAMPLE) {
 				g_ReceivedIRQs[EVENT_HID] |= MCUINT_ACCELEROMETER_NEW_SAMPLE;
 				T(svcSignalEvent(g_IRQEvents[EVENT_HID]));
 			}
-			continue;
-		}
-		if (received_irqs & filtered_events[i]) {
-			g_ReceivedIRQs[i] |= (received_irqs & filtered_events[i]);
-			T(svcSignalEvent(g_IRQEvents[i]));
 		}
 	}
 	

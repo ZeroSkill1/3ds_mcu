@@ -50,10 +50,6 @@ else
 	CFLAGS += -Os
 endif
 
-ifneq ($(DEBUG_PRINTS),)
-	CFLAGS += -DDEBUG_PRINTS
-endif
-
 ifneq ($(MCU_FIRM_VER_LOW),)
 	CFLAGS += -DMCU_FIRM_VER_LOW=$(MCU_FIRM_VER_LOW)
 endif

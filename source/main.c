@@ -3,7 +3,6 @@
 #include <3ds/result.h>
 #include <3ds/types.h>
 #include <3ds/gpio.h>
-#include <mcu/util.h>
 #include <3ds/svc.h>
 #include <3ds/i2c.h>
 #include <3ds/srv.h>
@@ -16,6 +15,7 @@
 #ifdef ENABLE_FIRM_UPLOAD
 const char mcu_firm[] = {
 	0x6A, 0x68, 0x6C,
+	#error "LAST WARNING. IF YOU KNOW WHAT YOU'RE DOING, REMOVE THIS ERROR DIRECTIVE TO CONTINUE COMPILING WITH FIRM UPLOAD SUPPORT."
 	#embed "mcu_firm.bin"
 };
 #endif
@@ -363,7 +363,6 @@ void MCU_Main()
 	T(svcCloseHandle(g_IRQEvents[EVENT_GPU]));
 	T(svcCloseHandle(g_IRQEvents[EVENT_HID]));
 	T(svcCloseHandle(g_IRQEvents[EVENT_POWER]));
-
 	gpioMcuExit();
 	i2cMcuExit();
 	srvExit();

@@ -21,7 +21,6 @@ The following environment variables are available to configure the build process
 | Variable             | Description                                                                                                                                                                       |
 |----------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `DEBUG`              | When set, all optimization is disabled and debug symbols are included in the output ELF. When not set, the ELF will be optimized for size and will not include any debug symbols. |
-| `DEBUG_PRINTS`       | Debug messages (IPC logs) will be shown in the GDB console when attached.                                                                                                         |
 | `N3DS`               | Build the New3DS-specific variation of the MCU module (with the New3DS bit set in the title ID).                                                                                  |
 | `ENABLE_FIRM_UPLOAD` | Enables MCU firmware upgrades. **USE WITH CAUTION. PLEASE READ THE ABOVE.**                                                                                                       |
 | `MCU_FIRM_VER_HIGH`  | When building with firmware upgrade support, specifies the major version of the MCU firmware blob. **USE WITH CAUTION. PLEASE READ THE ABOVE.**                                   |
