@@ -471,7 +471,7 @@ void MCUHID_HandleIPC()
 			cmdbuf[2] = (u32)pos;
 		}
 		break;
-	case 0x000F: // set accelerometer enabled (true/false)
+	case 0x000F: // set accelerometer irq enabled (true/false)
 		{
 			CHECK_HEADER(0x000F, 1, 0);
 			
@@ -490,9 +490,6 @@ void MCUHID_HandleIPC()
 		}
 		break;
 	}
-	
-	// debugging becomes ass if i enable this
-	//PRINT_RET("HID");
 }
 
 void MCURTC_HandleIPC()
@@ -970,7 +967,7 @@ void MCURTC_HandleIPC()
 			cmdbuf[3] = (u32)buf;
 		}
 		break;
-	case 0x0023: // clear pedometer step data (?)
+	case 0x0023: // clear pedometer step data
 		{
 			CHECK_HEADER(0x0023, 0, 0)
 			
@@ -1074,7 +1071,7 @@ void MCURTC_HandleIPC()
 			cmdbuf[2] = (u32)CHECKBIT(power_status, MCU_PWRSTAT_ADAPTER_CONNECTED);
 		}
 		break;
-	case 0x002C: // get adapter state
+	case 0x002C: // get charging state
 		{
 			CHECK_HEADER(0x002C, 0, 0)
 			
@@ -1330,50 +1327,50 @@ void MCURTC_HandleIPC()
 			cmdbuf[2] = (u32)state;
 		}
 		break;
-	case 0x003E: // set reg 50h - unknown
+	case 0x003E: // set pedometer wrap time minute
 		{
 			CHECK_HEADER(0x003E, 1, 0)
 			
 			u8 value = (u8)cmdbuf[1] & 0xFF;
 			
-			Result res = mcuSetUnk50(value, LOCK);
+			Result res = mcuSetPedometerWrapTimeMinute(value, LOCK);
 			
 			cmdbuf[0] = IPC_MakeHeader(0x003E, 1, 0);
 			cmdbuf[1] = res;
 		}
 		break;
-	case 0x003F: // get reg 50h - unknown
+	case 0x003F: // get pedometer wrap time minute
 		{
 			CHECK_HEADER(0x003F, 0, 0)
 			
 			u8 value = 0;
 			
-			Result res = mcuGetUnk50(&value, LOCK);
+			Result res = mcuGetPedometerWrapTimeMinute(&value, LOCK);
 			
 			cmdbuf[0] = IPC_MakeHeader(0x003F, 2, 0);
 			cmdbuf[1] = res;
 			cmdbuf[2] = (u32)value;
 		}
 		break;
-	case 0x0040: // set reg 51h - unknown
+	case 0x0040: // set pedometer wrap time second
 		{
 			CHECK_HEADER(0x0040, 1, 0)
 			
 			u8 value = (u8)cmdbuf[1] & 0xFF;
 			
-			Result res = mcuSetUnk51(value, LOCK);
+			Result res = mcuSetPedometerWrapTimeSecond(value, LOCK);
 			
 			cmdbuf[0] = IPC_MakeHeader(0x0040, 1, 0);
 			cmdbuf[1] = res;
 		}
 		break;
-	case 0x0041: // get reg 51h - unknown
+	case 0x0041: // get pedometer wrap time second
 		{
 			CHECK_HEADER(0x0041, 2, 0)
 			
 			u8 value = 0;
 			
-			Result res = mcuGetUnk51(&value, LOCK);
+			Result res = mcuGetPedometerWrapTimeSecond(&value, LOCK);
 			
 			cmdbuf[0] = IPC_MakeHeader(0x0041, 2, 0);
 			cmdbuf[1] = res;
@@ -1384,9 +1381,9 @@ void MCURTC_HandleIPC()
 		{
 			CHECK_HEADER(0x0042, 1, 0)
 			
-			u8 pattern[4] = { 0 };
+			u32 pattern = cmdbuf[1];
 			
-			Result res = mcuSetPowerLedBlinkPattern(&pattern, LOCK);
+			Result res = mcuSetPowerLedBlinkPattern(pattern, LOCK);
 			
 			cmdbuf[0] = IPC_MakeHeader(0x0042, 1, 0);
 			cmdbuf[1] = res;
@@ -2250,13 +2247,13 @@ void MCUPLS_HandleIPC()
 			cmdbuf[2] = (u32)year;
 		}
 		break;
-	case 0x0009: // get RTC subsecond correction value
+	case 0x0009: // get tick counter
 		{
 			CHECK_HEADER(0x0009, 0, 0)
 			
-			s16 value = 0;
+			u16 value = 0;
 			
-			Result res = mcuGetRtcSubSecondCorrection(&value, LOCK);
+			Result res = mcuGetTickCounter(&value, LOCK);
 			
 			cmdbuf[0] = IPC_MakeHeader(0x0009, 2, 0);
 			cmdbuf[1] = res;

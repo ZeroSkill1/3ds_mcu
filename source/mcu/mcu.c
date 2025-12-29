@@ -262,7 +262,7 @@ static Result _mcuUpdateFirmware(const void *payload, u32 payload_size)
 	
 	if (legacy_ver_high == 0 && legacy_ver_low == 1)
 		target_reg = MCUREG_LEGACY_FIRM_UPLOAD;
-	else target_reg = MCUREG_FIRMWARE_UPLOAD;
+	else target_reg = MCUREG_FIRMWARE_UPLOAD_0;
 	
 	res = mcuWriteRegisterBuffer(target_reg, payload, payload_size);
 	
@@ -439,17 +439,17 @@ inline Result mcuGetLedState(u8 led_regid, u8 *out_state, bool lock)
 	return L(mcuReadRegisterBuffer8, led_regid, out_state, sizeof(u8));
 }
 
-static Result _mcuSetPowerLedBlinkPattern(u8 (* blink_pattern)[4])
+static Result _mcuSetPowerLedBlinkPattern(u32 blink_pattern)
 {
 	MCU_PowerLedConfig config = { 0 };
 	Result res = mcuReadRegisterBuffer8(MCUREG_POWER_LED_STATE, &config.mode, sizeof(u8));
 	if (R_FAILED(res)) return res;
 	
-	_memcpy32_aligned(&config.blink_pattern, blink_pattern, sizeof(*blink_pattern));
+	config.blink_pattern = blink_pattern;
 	return mcuWriteRegisterBuffer8(MCUREG_POWER_LED_STATE, &config, sizeof(MCU_PowerLedConfig));
 }
 
-inline Result mcuSetPowerLedBlinkPattern(u8 (* blink_pattern)[4], bool lock)
+inline Result mcuSetPowerLedBlinkPattern(u32 blink_pattern, bool lock)
 {
 	if (lock) {
 		I2C_LOCKED_R(
@@ -485,12 +485,12 @@ inline Result mcuSetRtcTime(MCU_RtcData *data, bool lock)
 	data->month = INT2BCD(data->month);
 	data->year = INT2BCD(data->year);
 	
-	return L(mcuWriteRegisterBuffer8, MCUREG_RTC_TIME, data, sizeof(MCU_RtcData));
+	return L(mcuWriteRegisterBuffer8, MCUREG_RTC_TIME_SECOND, data, sizeof(MCU_RtcData));
 }
 
 inline Result mcuGetRtcTime(MCU_RtcData *out_data, bool lock)
 {
-	Result res = L(mcuReadRegisterBuffer8, MCUREG_RTC_TIME, out_data, sizeof(MCU_RtcData));
+	Result res = L(mcuReadRegisterBuffer8, MCUREG_RTC_TIME_SECOND, out_data, sizeof(MCU_RtcData));
 	if (R_FAILED(res)) return res;
 	
 	out_data->second = BCD2INT(out_data->second);
@@ -537,14 +537,14 @@ inline Result mcuSetRtcAlarm(MCU_RtcAlarm *alarm, bool lock)
 		INT2BCD(alarm->year)
 	};
 	
-	return L(mcuWriteRegisterBuffer8, MCUREG_RTC_ALARM, &bcdalarm, sizeof(MCU_RtcAlarm));
+	return L(mcuWriteRegisterBuffer8, MCUREG_RTC_ALARM_MINUTE, &bcdalarm, sizeof(MCU_RtcAlarm));
 }
 
 inline Result mcuGetRtcAlarm(MCU_RtcAlarm *alarm, bool lock)
 {
 	MCU_RtcAlarm bcdalarm;
 	
-	Result res = L(mcuReadRegisterBuffer8, MCUREG_RTC_ALARM, &bcdalarm, sizeof(MCU_RtcAlarm));
+	Result res = L(mcuReadRegisterBuffer8, MCUREG_RTC_ALARM_MINUTE, &bcdalarm, sizeof(MCU_RtcAlarm));
 	if (R_FAILED(res)) return res;
 	
 	alarm->minute = BCD2INT(bcdalarm.minute);
@@ -570,9 +570,10 @@ inline Result mcuGetRtcAlarmField(u8 field_regid, u8 *out_value, bool lock)
 	return res;
 }
 
-inline Result mcuGetRtcSubSecondCorrection(s16 *out_value, bool lock)
+inline Result mcuGetTickCounter(u16 *out_value, bool lock)
 {
-	return L(mcuReadRegisterBuffer8, MCUREG_RTC_RSUBC, out_value, sizeof(s16));
+	/* u16 spread across two registers */
+	return L(mcuReadRegisterBuffer8, MCUREG_TICK_COUNTER_LSB, out_value, sizeof(u16));
 }
 
 inline Result mcuSetOmeterMode(u8 mode, bool lock)
@@ -596,9 +597,9 @@ inline Result mcuGetPedometerEnabled(u8 *out_enabled, bool lock)
 
 inline Result mcuReadPedometerStepCount(u32 *out_count, bool lock)
 {
-	/* the step count is a u24 */
+	/* the step count is a u24 spread across 3 registers */
 	*out_count = 0;
-	return L(mcuReadRegisterBuffer8, MCUREG_PEDOMETER_STEPS, out_count, sizeof(u32));
+	return L(mcuReadRegisterBuffer8, MCUREG_PEDOMETER_STEPS_LOWBYTE, out_count, 3);
 }
 
 inline Result mcuReadPedoemterStepData(MCU_PedometerStepData *out_data, bool lock)
@@ -745,7 +746,7 @@ inline Result mcuGetAccelerometerScale(u8 *out_scale, bool lock)
 
 inline Result mcuReadAccelerometerData(MCU_AccelerometerData *out_data, bool lock)
 {
-	Result res = L(mcuReadRegisterBuffer8, MCUREG_ACCELEROMETER_OUTPUT, out_data, sizeof(MCU_AccelerometerData));
+	Result res = L(mcuReadRegisterBuffer8, MCUREG_ACCELEROMETER_OUTPUT_X_LSB, out_data, sizeof(MCU_AccelerometerData));
 	if (R_FAILED(res)) return res;
 	out_data->x >>= 4;
 	out_data->y >>= 4;
@@ -753,29 +754,29 @@ inline Result mcuReadAccelerometerData(MCU_AccelerometerData *out_data, bool loc
 	return res;
 }
 
-inline Result mcuSetUnk50(u8 value, bool lock)
+inline Result mcuSetPedometerWrapTimeMinute(u8 value, bool lock)
 {
 	value = INT2BCD(value);
-	return L(mcuWriteRegisterBuffer8, MCUREG_UNK50, &value, sizeof(u8));
+	return L(mcuWriteRegisterBuffer8, MCUREG_PEDOMETER_WRAP_MINUTE, &value, sizeof(u8));
 }
 
-inline Result mcuGetUnk50(u8 *out_value, bool lock)
+inline Result mcuGetPedometerWrapTimeMinute(u8 *out_value, bool lock)
 {
-	Result res = L(mcuReadRegisterBuffer8, MCUREG_UNK50, out_value, sizeof(u8));
+	Result res = L(mcuReadRegisterBuffer8, MCUREG_PEDOMETER_WRAP_MINUTE, out_value, sizeof(u8));
 	if (R_FAILED(res)) return res;
 	*out_value = BCD2INT(*out_value);
 	return res;
 }
 
-inline Result mcuSetUnk51(u8 value, bool lock)
+inline Result mcuSetPedometerWrapTimeSecond(u8 value, bool lock)
 {
 	value = INT2BCD(value);
-	return L(mcuWriteRegisterBuffer8, MCUREG_UNK51, &value, sizeof(u8));
+	return L(mcuWriteRegisterBuffer8, MCUREG_PEDOMETER_WRAP_SECOND, &value, sizeof(u8));
 }
 
-inline Result mcuGetUnk51(u8 *out_value, bool lock)
+inline Result mcuGetPedometerWrapTimeSecond(u8 *out_value, bool lock)
 {
-	Result res = L(mcuReadRegisterBuffer8, MCUREG_UNK51, out_value, sizeof(u8));
+	Result res = L(mcuReadRegisterBuffer8, MCUREG_PEDOMETER_WRAP_SECOND, out_value, sizeof(u8));
 	if (R_FAILED(res)) return res;
 	*out_value = BCD2INT(*out_value);
 	return res;
@@ -785,14 +786,14 @@ inline Result mcuSetVolumeCalibration(u8 min, u8 max, bool lock)
 {
 	u8 data[2] = { min, max };
 	
-	return L(mcuWriteRegisterBuffer8, MCUREG_VOLUME_CALIBRATION, &data, sizeof(data));
+	return L(mcuWriteRegisterBuffer8, MCUREG_VOLUME_CALIBRATION_MIN, &data, sizeof(data));
 }
 
 inline Result mcuGetVolumeCalibration(u8 *out_min, u8 *out_max, bool lock)
 {
 	u8 data[2] = { 0, 0 };
 	
-	Result res = L(mcuReadRegisterBuffer8, MCUREG_VOLUME_CALIBRATION, &data, sizeof(data));
+	Result res = L(mcuReadRegisterBuffer8, MCUREG_VOLUME_CALIBRATION_MIN, &data, sizeof(data));
 	if (R_FAILED(res)) return res;
 	
 	*out_min = data[0];

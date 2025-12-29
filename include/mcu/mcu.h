@@ -69,6 +69,7 @@ enum MCU_Interrupt
 	MCUINT_VIDEO_BOT_BACKLIGHT_ON      = BIT(27),
 	MCUINT_VIDEO_TOP_BACKLIGHT_OFF     = BIT(28),
 	MCUINT_VIDEO_TOP_BACKLIGHT_ON      = BIT(29),
+	/* these are unused */
 	MCUINT_MCU_SYSMODULE_0             = BIT(30),
 	MCUINT_MCU_SYSMODULE_1             = BIT(31),
 };
@@ -87,7 +88,9 @@ enum MCU_RegisterID {
 	MCUREG_VCOM_BOTTOM                  = 0x4,
 	
 	/* firmware upload */
-	MCUREG_FIRMWARE_UPLOAD              = 0x5,
+	MCUREG_FIRMWARE_UPLOAD_0            = 0x5,
+	MCUREG_FIRMWARE_UPLOAD_1            = 0x6,
+	MCUREG_FIRMWARE_UPLOAD_2            = 0x7,
 	
 	/* sliders */
 	MCUREG_3D_SLIDER_POSITION           = 0x8,
@@ -133,8 +136,7 @@ enum MCU_RegisterID {
 	MCUREG_NOTIFICATION_LED_CYCLE_STATE = 0x2E,
 	
 	/* RTC time */
-	MCUREG_RTC_TIME                     = 0x30,
-	MCUREG_RTC_TIME_SECOND              = MCUREG_RTC_TIME,
+	MCUREG_RTC_TIME_SECOND              = 0x30,
 	MCUREG_RTC_TIME_MINUTE              = 0x31,
 	MCUREG_RTC_TIME_HOUR                = 0x32,
 	MCUREG_RTC_TIME_WEEKDAY             = 0x33,
@@ -144,44 +146,41 @@ enum MCU_RegisterID {
 	MCUREG_RTC_TIME_CORRECTION          = 0x37,
 	
 	/* RTC alarm */
-	MCUREG_RTC_ALARM                    = 0x38,
-	MCUREG_RTC_ALARM_MINUTE             = MCUREG_RTC_ALARM,
+	MCUREG_RTC_ALARM_MINUTE             = 0x38,
 	MCUREG_RTC_ALARM_HOUR               = 0x39,
 	MCUREG_RTC_ALARM_DAY                = 0x3A,
 	MCUREG_RTC_ALARM_MONTH              = 0x3B,
 	MCUREG_RTC_ALARM_YEAR               = 0x3C,
 	
-	/* RTC Sub Second Correction */
-	MCUREG_RTC_RSUBC                    = 0x3D,
-	MCUREG_RTC_RSUBC_LSB                = MCUREG_RTC_RSUBC,
-	MCUREG_RTC_RSUBC_MSB                = 0x3E,
+	/* Tick Counter */
+	MCUREG_TICK_COUNTER_LSB             = 0x3D,
+	MCUREG_TICK_COUNTER_MSB             = 0x3E,
 	
 	/* -ometers */
 	MCUREG_OMETER_MODE                  = 0x40,
+
 	/* accelerometer */
 	MCUREG_ACCELEROMETER_MANUAL_REGID_R = 0x41,
 	MCUREG_ACCELEROMETER_MANUAL_REGID_W = 0x43,
 	MCUREG_ACCELEROMETER_MANUAL_IO      = 0x44,
-	MCUREG_ACCELEROMETER_OUTPUT         = 0x45,
-	MCUREG_ACCELEROMETER_OUTPUT_X_LSB   = MCUREG_ACCELEROMETER_OUTPUT,
+	MCUREG_ACCELEROMETER_OUTPUT_X_LSB   = 0x45,
 	MCUREG_ACCELEROMETER_OUTPUT_X_MSB   = 0x46,
 	MCUREG_ACCELEROMETER_OUTPUT_Y_LSB   = 0x47,
 	MCUREG_ACCELEROMETER_OUTPUT_Y_MSB   = 0x48,
 	MCUREG_ACCELEROMETER_OUTPUT_Z_LSB   = 0x49,
 	MCUREG_ACCELEROMETER_OUTPUT_Z_MSB   = 0x4A,
+
 	/* software pedometer */
-	MCUREG_PEDOMETER_STEPS              = 0x4B,
-	MCUREG_PEDOMETER_STEPS_TODAY        = MCUREG_PEDOMETER_STEPS,
-	MCUREG_PEDOMETER_STEPS_UNK          = 0x4C,
-	MCUREG_PEDOMETER_STEPS_TOTAL        = 0x4D,
+	MCUREG_PEDOMETER_STEPS_LOWBYTE      = 0x4B,
+	MCUREG_PEDOMETER_STEPS_MIDDLEBYTE   = 0x4C,
+	MCUREG_PEDOMETER_STEPS_HIGHBYTE     = 0x4D,
 	MCUREG_PEDOMETER_CNT                = 0x4E,
 	MCUREG_PEDOMETER_STEP_DATA          = 0x4F,
-	MCUREG_UNK50                        = 0x50,
-	MCUREG_UNK51                        = 0x51,
+	MCUREG_PEDOMETER_WRAP_MINUTE        = 0x50,
+	MCUREG_PEDOMETER_WRAP_SECOND        = 0x51,
 	
-	/* calibration data(?) */
-	MCUREG_VOLUME_CALIBRATION           = 0x58,
-	MCUREG_VOLUME_CALIBRATION_MIN       = MCUREG_VOLUME_CALIBRATION,
+	/* volume calibration */
+	MCUREG_VOLUME_CALIBRATION_MIN       = 0x58,
 	MCUREG_VOLUME_CALIBRATION_MAX       = 0x59,
 	
 	/* storage area */
@@ -366,10 +365,10 @@ typedef struct __attribute__((packed)) MCU_InfoRegs {
 	u8 raw_button_states;
 } MCU_InfoRegs;
 
-typedef struct MCU_PowerLedConfig
+typedef struct __attribute__((packed)) MCU_PowerLedConfig
 {
 	u8 mode;
-	u8 blink_pattern[4];
+	u32 blink_pattern;
 } MCU_PowerLedConfig;
 
 enum {
@@ -446,7 +445,7 @@ Result mcuGetInterruptMask(u32 *out_enabled_interrupts, bool lock);
 
 Result mcuSetLedState(u8 led_regid, u8 state, bool lock);
 Result mcuGetLedState(u8 led_regid, u8 *out_state, bool lock);
-Result mcuSetPowerLedBlinkPattern(u8 (* blink_pattern)[4], bool lock);
+Result mcuSetPowerLedBlinkPattern(u32 blink_pattern, bool lock);
 Result mcuSetNotificationLedData(MCU_NotificationLedData *data, bool lock);
 Result mcuSetNotificationLedAnimation(MCU_NotifictationLedAnimation *animation, bool lock);
 Result mcuGetNotificationLedCycleState(u8 *out_state, bool lock);
@@ -462,7 +461,7 @@ Result mcuSetRtcAlarm(MCU_RtcAlarm *alarm, bool lock);
 Result mcuGetRtcAlarm(MCU_RtcAlarm *alarm, bool lock);
 Result mcuSetRtcAlarmField(u8 field_regid, u8 value, bool lock);
 Result mcuGetRtcAlarmField(u8 field_regid, u8 *out_value, bool lock);
-Result mcuGetRtcSubSecondCorrection(s16 *out_value, bool lock);
+Result mcuGetTickCounter(u16 *out_value, bool lock);
 
 Result mcuSetOmeterMode(u8 mode, bool lock);
 Result mcuGetOmeterMode(u8 *out_mode, bool lock);
@@ -481,10 +480,10 @@ Result mcuGetAccelerometerInternalFilterEnabled(u8 *out_enabled, bool lock);
 Result mcuSetAccelerometerScale(u8 scale, bool lock);
 Result mcuGetAccelerometerScale(u8 *out_scale, bool lock);
 Result mcuReadAccelerometerData(MCU_AccelerometerData *out_data, bool lock);
-Result mcuSetUnk50(u8 value, bool lock);
-Result mcuGetUnk50(u8 *out_value, bool lock);
-Result mcuSetUnk51(u8 value, bool lock);
-Result mcuGetUnk51(u8 *out_value, bool lock);
+Result mcuSetPedometerWrapTimeMinute(u8 value, bool lock);
+Result mcuGetPedometerWrapTimeMinute(u8 *out_value, bool lock);
+Result mcuSetPedometerWrapTimeSecond(u8 value, bool lock);
+Result mcuGetPedometerWrapTimeSecond(u8 *out_value, bool lock);
 
 Result mcuSetVolumeCalibration(u8 min, u8 max, bool lock);
 Result mcuGetVolumeCalibration(u8 *out_min, u8 *out_max, bool lock);
