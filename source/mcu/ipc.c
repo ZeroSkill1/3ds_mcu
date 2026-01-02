@@ -100,6 +100,8 @@ void MCUCAM_HandleIPC()
 			cmdbuf[2] = (u32)state;
 		}
 		break;
+	default:
+		RET_OS_INVALID_IPCARG;
 	}
 }
 
@@ -285,6 +287,8 @@ void MCUGPU_HandleIPC()
 			cmdbuf[2] = events;
 		}
 		break;
+	default:
+		RET_OS_INVALID_IPCARG;
 	}
 }
 
@@ -489,6 +493,8 @@ void MCUHID_HandleIPC()
 			cmdbuf[1] = 0;
 		}
 		break;
+	default:
+		RET_OS_INVALID_IPCARG;
 	}
 }
 
@@ -1708,6 +1714,8 @@ void MCURTC_HandleIPC()
 			cmdbuf[2] = (u32)clockseq;
 		}
 		break;
+	default:
+		RET_OS_INVALID_IPCARG;
 	}
 }
 
@@ -1757,6 +1765,8 @@ void MCUSND_HandleIPC()
 			cmdbuf[2] = (u32)value;
 		}
 		break;
+	default:
+		RET_OS_INVALID_IPCARG;
 	}
 }
 
@@ -1882,6 +1892,8 @@ void MCUNWM_HandleIPC()
 			cmdbuf[2] = (u32)set;
 		}
 		break;
+	default:
+		RET_OS_INVALID_IPCARG;
 	}
 }
 
@@ -2132,6 +2144,8 @@ void MCUHWC_HandleIPC()
 			cmdbuf[2] = (u32)value;
 		}
 		break;
+	default:
+			RET_OS_INVALID_IPCARG;
 	}
 }
 
@@ -2260,6 +2274,8 @@ void MCUPLS_HandleIPC()
 			cmdbuf[2] = value;
 		}
 		break;
+	default:
+			RET_OS_INVALID_IPCARG;
 	}
 }
 
@@ -2281,6 +2297,8 @@ void MCUCDC_HandleIPC()
 			cmdbuf[1] = res;
 		}
 		break;
+	default:
+		RET_OS_INVALID_IPCARG;
 	}
 }
 

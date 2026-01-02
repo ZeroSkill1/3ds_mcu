@@ -402,18 +402,19 @@ inline Result mcuGetPowerStatus(u8 *out_status, bool lock)
 
 inline Result mcuGetReceivedIrqs(u32 *out_events, bool lock)
 {
-	return L(mcuReadRegisterBuffer8, MCUREG_RECEIVED_IRQS, out_events, sizeof(u32));
+	/* received IRQs are spread across 4 registers */
+	return L(mcuReadRegisterBuffer8, MCUREG_RECEIVED_IRQS_0, out_events, sizeof(u32));
 }
 
 inline Result mcuSetInterruptMask(u32 enabled_interrupts, bool lock)
 {
 	enabled_interrupts = ~(enabled_interrupts & ~(MCUINT_MCU_SYSMODULE_0 | MCUINT_MCU_SYSMODULE_1));
-	return L(mcuWriteRegisterBuffer8, MCUREG_IRQ_MASK, &enabled_interrupts, sizeof(u32));
+	return L(mcuWriteRegisterBuffer8, MCUREG_IRQ_MASK_0, &enabled_interrupts, sizeof(u32));
 }
 
 inline Result mcuGetInterruptMask(u32 *out_enabled_interrupts, bool lock)
 {
-	Result res = L(mcuReadRegisterBuffer8, MCUREG_IRQ_MASK, out_enabled_interrupts, sizeof(u32));
+	Result res = L(mcuReadRegisterBuffer8, MCUREG_IRQ_MASK_0, out_enabled_interrupts, sizeof(u32));
 	if (R_FAILED(res)) return res;
 	*out_enabled_interrupts = ~(*out_enabled_interrupts) & ~(MCUINT_MCU_SYSMODULE_0 | MCUINT_MCU_SYSMODULE_1);
 	return res;

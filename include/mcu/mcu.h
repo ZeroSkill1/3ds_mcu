@@ -111,8 +111,15 @@ enum MCU_RegisterID {
 	MCUREG_LEGACY_FIRM_UPLOAD           = 0x3B,
 	
 	/* IRQs */
-	MCUREG_RECEIVED_IRQS                = 0x10,
-	MCUREG_IRQ_MASK                     = 0x18,
+	MCUREG_RECEIVED_IRQS_0              = 0x10,
+	MCUREG_RECEIVED_IRQS_1              = 0x11,
+	MCUREG_RECEIVED_IRQS_2              = 0x12,
+	MCUREG_RECEIVED_IRQS_3              = 0x13,
+
+	MCUREG_IRQ_MASK_0                   = 0x18,
+	MCUREG_IRQ_MASK_1                   = 0x19,
+	MCUREG_IRQ_MASK_2                   = 0x1A,
+	MCUREG_IRQ_MASK_3                   = 0x1B,
 	
 	/* power control */
 	MCUREG_PWR_CTL                      = 0x20,
