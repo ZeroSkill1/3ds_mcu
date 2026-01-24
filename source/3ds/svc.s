@@ -151,6 +151,6 @@ BEGIN_ASM_FUNC svcSignalEvent
 END_ASM_FUNC
 
 BEGIN_ASM_FUNC svcGetSystemTick
-	svc 0xA
+	svc 0x28
 	bx lr
 END_ASM_FUNC
